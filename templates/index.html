@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Marks Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Student Marks Analyzer</h1>
+
+    <form method="POST">
+        <input type="number" name="math" placeholder="Math Marks" required>
+
+        <input type="number" name="science" placeholder="Science Marks" required>
+
+        <input type="number" name="english" placeholder="English Marks" required>
+
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if average %}
+        <div class="result">
+            <h2>Average: {{ average }}</h2>
+            <h2>Result: {{ result }}</h2>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
