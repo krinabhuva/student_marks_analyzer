@@ -1,31 +1,323 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Marks Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Analytics Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    padding:30px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:white;
+    margin-bottom:30px;
+}
+
+.form-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ddd;
+    border-radius:10px;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.add-btn{
+    background:#4f46e5;
+    color:white;
+}
+
+.download-btn{
+    background:#16a34a;
+    color:white;
+    margin-top:20px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+}
+
+.card h2{
+    color:#4f46e5;
+}
+
+.table-container{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#4f46e5;
+    color:white;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #eee;
+}
+
+tr:hover{
+    background:#f3f4f6;
+}
+
+</style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📊 Student Marks Analyzer</h1>
 
-    <form method="POST">
-        <input type="number" name="math" placeholder="Math Marks" required>
+<h1>📊 Student Analytics Dashboard</h1>
 
-        <input type="number" name="science" placeholder="Science Marks" required>
+<div class="form-card">
 
-        <input type="number" name="english" placeholder="English Marks" required>
+<input type="text" id="name" placeholder="Student Name">
 
-        <button type="submit">Analyze</button>
-    </form>
+<input type="number" id="math" placeholder="Math Marks">
 
-    {% if average %}
-        <div class="result">
-            <h2>Average: {{ average }}</h2>
-            <h2>Result: {{ result }}</h2>
-        </div>
-    {% endif %}
+<input type="number" id="science" placeholder="Science Marks">
+
+<input type="number" id="english" placeholder="English Marks">
+
+<button class="add-btn" onclick="addStudent()">
+Add Student
+</button>
+
 </div>
+
+<div class="cards">
+
+<div class="card">
+<h3>Class Average</h3>
+<h2 id="classAverage">0</h2>
+</div>
+
+<div class="card">
+<h3>Top Performer</h3>
+<h2 id="topper">-</h2>
+</div>
+
+<div class="card">
+<h3>Total Students</h3>
+<h2 id="totalStudents">0</h2>
+</div>
+
+</div>
+
+<div class="table-container">
+
+<table id="studentTable">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Math</th>
+<th>Science</th>
+<th>English</th>
+<th>Average</th>
+<th>Grade</th>
+</tr>
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+<button class="download-btn" onclick="downloadCSV()">
+⬇ Download CSV
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let students = [];
+
+function addStudent() {
+
+    let name = document.getElementById("name").value;
+    let math = parseFloat(document.getElementById("math").value);
+    let science = parseFloat(document.getElementById("science").value);
+    let english = parseFloat(document.getElementById("english").value);
+
+    if (!name || isNaN(math) || isNaN(science) || isNaN(english)) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    let average = ((math + science + english) / 3).toFixed(2);
+
+    let grade;
+
+    if (average >= 90)
+        grade = "A+";
+    else if (average >= 80)
+        grade = "A";
+    else if (average >= 70)
+        grade = "B";
+    else if (average >= 60)
+        grade = "C";
+    else if (average >= 40)
+        grade = "D";
+    else
+        grade = "F";
+
+    students.push({
+        name,
+        math,
+        science,
+        english,
+        average,
+        grade
+    });
+
+    updateTable();
+    updateAnalytics();
+
+    document.getElementById("name").value = "";
+    document.getElementById("math").value = "";
+    document.getElementById("science").value = "";
+    document.getElementById("english").value = "";
+}
+
+function updateTable() {
+
+    let tbody = document.querySelector("#studentTable tbody");
+
+    tbody.innerHTML = "";
+
+    students.forEach(student => {
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${student.name}</td>
+            <td>${student.math}</td>
+            <td>${student.science}</td>
+            <td>${student.english}</td>
+            <td>${student.average}</td>
+            <td>${student.grade}</td>
+        </tr>
+        `;
+    });
+}
+
+function updateAnalytics() {
+
+    if (students.length === 0) return;
+
+    let total = students.length;
+
+    let sum = students.reduce(
+        (acc, student) => acc + parseFloat(student.average),
+        0
+    );
+
+    let classAvg = (sum / total).toFixed(2);
+
+    let topper = students.reduce((prev, current) =>
+        parseFloat(prev.average) > parseFloat(current.average)
+            ? prev
+            : current
+    );
+
+    document.getElementById("classAverage").innerText = classAvg;
+    document.getElementById("topper").innerText = topper.name;
+    document.getElementById("totalStudents").innerText = total;
+}
+
+function downloadCSV() {
+
+    if (students.length === 0) {
+        alert("No student data available!");
+        return;
+    }
+
+    let csv = "Name,Math,Science,English,Average,Grade\n";
+
+    students.forEach(student => {
+
+        csv += `${student.name},${student.math},${student.science},${student.english},${student.average},${student.grade}\n`;
+
+    });
+
+    let blob = new Blob(
+        [csv],
+        { type: "text/csv;charset=utf-8;" }
+    );
+
+    let url = URL.createObjectURL(blob);
+
+    let link = document.createElement("a");
+
+    link.href = url;
+    link.download = "students.csv";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+</script>
 
 </body>
 </html>
